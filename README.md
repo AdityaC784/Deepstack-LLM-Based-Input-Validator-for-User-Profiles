@@ -56,8 +56,8 @@ pip install -r requirements.txt
 cp .env.example .env
 
 # Edit .env and add your GROQ API key
-# GROQ_API_KEY=your_actual_api_key_here
-#GROQ_MODEL="MODELNAME"
+GROQ_API_KEY=your_actual_api_key_here
+GROQ_MODEL="MODELNAME"
 ```
 
 
@@ -342,6 +342,4 @@ For questions or issues:
 **Created for**: DeepStack AI/ML 
 **Last Updated**: January 2026
 
-<p align="center">
-  <img src="image.png" width="350" alt="Accessibility text">
-</p>
+
