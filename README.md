@@ -328,13 +328,7 @@ Based on assignment requirements:
 
 MIT License - Feel free to use and modify
 
-## 🤝 Contributing
 
-Contributions welcome! Please follow these guidelines:
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
 
 ## 📞 Support
 
@@ -345,5 +339,9 @@ For questions or issues:
 
 ---
 
-**Created for**: DeepStack AI/ML Internship
+**Created for**: DeepStack AI/ML 
 **Last Updated**: January 2026
+
+<p align="center">
+  <img src="image.png" width="350" alt="Accessibility text">
+</p>
