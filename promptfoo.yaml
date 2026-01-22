@@ -1,0 +1,316 @@
+prompts:
+  - |
+    You are a strict data validator. Validate the following user profile data and return ONLY a valid JSON response.
+    
+    User Profile Data:
+    {{userInput}}
+    
+    ERRORS (Critical issues):
+    1. 'name' field is mandatory and non-empty
+    2. 'email' (if present) must be valid email format
+    3. 'age' (if present) must be positive number
+    4. 'country' (if present) must be ISO-2 country code (2 uppercase letters like US, IN, GB)
+    5. 'phone' is mandatory and must be E.164 format (starts with + and digits)
+    
+    WARNINGS (Non-critical):
+    1. Age below 18
+    2. Name shorter than 3 characters
+    3. Disposable email domains (akixpres.com, tempmail.com, etc.)
+    4. Country code mismatch in phone vs country field
+    
+    Return ONLY this JSON structure, with no additional text before or after:
+    
+    {
+      "is_valid": boolean,
+      "errors": [error messages],
+      "warnings": [warning messages]
+    }
+
+providers:
+  - id: groq:llama-3.3-70b-versatile
+  
+      
+
+tests:
+  # Test Case 1: Valid Input
+  - description: "Valid user profile"
+    vars:
+      userInput: |
+        {
+          "name": "Aarav Patel",
+          "email": "aarav.patel@gmail.com",
+          "age": 24,
+          "country": "IN",
+          "phone": "+919876543210"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: true
+        errors: []
+        warnings: []
+
+  # Test Case 2: Invalid Input
+  - description: "Invalid user profile with multiple errors"
+    vars:
+      userInput: |
+        {
+          "name": "",
+          "email": "user@gmail",
+          "age": 16,
+          "country": "India",
+          "phone": "99999"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: false
+      assert:
+        - type: length-greater-than
+          value: errors
+          compareValue: 2
+
+ 
+  - description: "Missing required name field"
+    vars:
+      userInput: |
+        {
+          "email": "test@gmail.com",
+          "age": 25,
+          "country": "US",
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: false
+      assert:
+        - type: contains
+          value: errors
+          compareValue: "name"
+
+ 
+  - description: "Missing required phone field"
+    vars:
+      userInput: |
+        {
+          "name": "John Doe",
+          "email": "john@gmail.com",
+          "age": 30,
+          "country": "US"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: false
+      assert:
+        - type: contains
+          value: errors
+          compareValue: "phone"
+
+
+  - description: "Invalid email format"
+    vars:
+      userInput: |
+        {
+          "name": "John Doe",
+          "email": "invalid.email",
+          "age": 30,
+          "country": "US",
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: false
+      assert:
+        - type: contains
+          value: errors
+          compareValue: "email"
+
+  
+  - description: "Phone not in E.164 format"
+    vars:
+      userInput: |
+        {
+          "name": "Jane Smith",
+          "email": "jane@gmail.com",
+          "age": 28,
+          "country": "US",
+          "phone": "2025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: false
+      assert:
+        - type: contains
+          value: errors
+          compareValue: "E.164"
+
+
+  - description: "Country not ISO-2 format"
+    vars:
+      userInput: |
+        {
+          "name": "Ram Kumar",
+          "email": "ram@gmail.com",
+          "age": 22,
+          "country": "India",
+          "phone": "+919876543210"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: false
+      assert:
+        - type: contains
+          value: errors
+          compareValue: "country"
+
+
+  - description: "Negative age value"
+    vars:
+      userInput: |
+        {
+          "name": "Test User",
+          "email": "test@gmail.com",
+          "age": -5,
+          "country": "US",
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: false
+      assert:
+        - type: contains
+          value: errors
+          compareValue: "age"
+
+
+  - description: "Minor age triggers warning"
+    vars:
+      userInput: |
+        {
+          "name": "Young User",
+          "email": "young@gmail.com",
+          "age": 16,
+          "country": "US",
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: true
+      assert:
+        - type: length-greater-than
+          value: warnings
+          compareValue: 0
+        - type: contains
+          value: warnings
+          compareValue: "18"
+
+
+  - description: "Name shorter than 3 characters triggers warning"
+    vars:
+      userInput: |
+        {
+          "name": "Jo",
+          "email": "jo@gmail.com",
+          "age": 25,
+          "country": "US",
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: true
+      assert:
+        - type: length-greater-than
+          value: warnings
+          compareValue: 0
+        - type: contains
+          value: warnings
+          compareValue: "3"
+
+
+  - description: "Disposable email triggers warning"
+    vars:
+      userInput: |
+        {
+          "name": "Temp User",
+          "email": "user@tempmail.com",
+          "age": 25,
+          "country": "US",
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: true
+      assert:
+        - type: length-greater-than
+          value: warnings
+          compareValue: 0
+        - type: contains
+          value: warnings
+          compareValue: "disposable"
+
+
+  - description: "Country code mismatch in phone"
+    vars:
+      userInput: |
+        {
+          "name": "John Smith",
+          "email": "john@gmail.com",
+          "age": 30,
+          "country": "IN",
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: true
+      assert:
+        - type: length-greater-than
+          value: warnings
+          compareValue: 0
+        - type: contains
+          value: warnings
+          compareValue: "country"
+
+
+  - description: "Null fields should be ignored"
+    vars:
+      userInput: |
+        {
+          "name": "Valid User",
+          "email": null,
+          "age": null,
+          "country": null,
+          "phone": "+12025551234"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: true
+        errors: []
+
+
+  - description: "Minimal valid input"
+    vars:
+      userInput: |
+        {
+          "name": "Alice",
+          "phone": "+11234567890"
+        }
+    expected:
+      type: json
+      value:
+        is_valid: true
+        errors: []
+
+evaluateOptions:
+  maxConcurrency: 5
+  showProgressBar: true
