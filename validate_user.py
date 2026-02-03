@@ -1,5 +1,3 @@
-
-
 import json
 import sys
 import os
@@ -41,7 +39,7 @@ class UserValidator:
             )
 
             response_text = response.choices[0].message.content
-            # print("DEBUG: \n" + response_text)
+            print("DEBUG: \n" + response_text)
             result = self._parse_llm_response(response_text)
 
             if not self._validate_schema(result):

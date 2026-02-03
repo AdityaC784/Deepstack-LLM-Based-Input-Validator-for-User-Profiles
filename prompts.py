@@ -15,7 +15,7 @@ You must validate this data against the following constraints:
 ERRORS (Critical issues - field is invalid):
 1. The 'name' field is mandatory. If missing or empty, this is an error.
 2. If 'email' is provided, it must be a valid email address format (must contain @ and a domain).
-3. If 'age' is provided, it must be a positive number (greater than 0). Negative numbers or zero are errors.
+3. If 'age' is provided, it must be a positive number (18+). Negative numbers or zero are errors.
 4. If 'country' is provided, it must be a valid ISO-2 country code format (exactly 2 uppercase letters, like US, IN, GB, etc.). Common country codes include: US, IN, GB, CA, AU, DE, FR, JP, BR, MX, etc.
 5. The 'phone' field is mandatory. If present, it must follow the E.164 international format (starts with + and contains only digits, typically +[country code][number], like +919876543210 for India).
 
